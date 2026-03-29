@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Idea Journal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --border: #e4e2da;
+      --border-strong: #ccc9be;
+      --text: #1a1917;
+      --text-muted: #6b6860;
+      --text-hint: #a09e98;
+      --accent: #1a1917;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 99px;
+      --font: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap');
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .app {
+      max-width: 660px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .header h1 span {
+      font-weight: 500;
+    }
+    .header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* Form */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row:last-child { margin-bottom: 0; }
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 6px;
+    }
+    input[type=text], textarea {
+      width: 100%;
+      font-family: var(--font);
+      font-size: 14px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type=text]:focus, textarea:focus {
+      border-color: var(--border-strong);
+    }
+    textarea { resize: vertical; min-height: 76px; line-height: 1.6; }
+    ::placeholder { color: var(--text-hint); }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Priority */
+    .priority-row { display: flex; gap: 6px; }
+    .pri-btn {
+      flex: 1; padding: 8px 4px; font-size: 13px; font-family: var(--font);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--bg); color: var(--text-muted); cursor: pointer;
+      text-align: center; transition: all 0.15s;
+    }
+    .pri-btn:hover { border-color: var(--border-strong); }
+    .pri-btn.p-low.active  { background: #edf6e5; color: #3a6e18; border-color: #c4e0a8; }
+    .pri-btn.p-med.active  { background: #fef4e4; color: #8a5c10; border-color: #f5d28a; }
+    .pri-btn.p-high.active { background: #fdecea; color: #a82b2b; border-color: #f5b3b0; }
+
+    /* Mood */
+    .mood-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .mood-btn {
+      padding: 6px 13px; font-size: 13px; font-family: var(--font);
+      border: 1px solid var(--border); border-radius: var(--radius-pill);
+      background: var(--bg); color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mood-btn:hover { border-color: var(--border-strong); color: var(--text); }
+    .mood-btn.active {
+      background: var(--text); color: var(--surface);
+      border-color: var(--text);
+    }
+
+    /* Save button */
+    .save-btn {
+      width: 100%; padding: 10px; font-size: 14px; font-weight: 500;
+      font-family: var(--font); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); background: var(--text); color: var(--surface);
+      cursor: pointer; margin-top: 4px; transition: opacity 0.15s;
+    }
+    .save-btn:hover { opacity: 0.85; }
+
+    /* Filters */
+    .section-label {
+      font-size: 12px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .tag-filter {
+      padding: 5px 13px; font-size: 13px; font-family: var(--font);
+      border: 1px solid var(--border); border-radius: var(--radius-pill);
+      background: var(--surface); color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tag-filter:hover { border-color: var(--border-strong); }
+    .tag-filter.active {
+      background: var(--text); color: var(--surface); border-color: var(--text);
+    }
+
+    /* Ideas */
+    .ideas-list { display: flex; flex-direction: column; gap: 10px; }
+    .idea-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+      transition: border-color 0.15s;
+    }
+    .idea-card:hover { border-color: var(--border-strong); }
+    .idea-top {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 10px; margin-bottom: 6px;
+    }
+    .idea-title { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.4; }
+    .badge {
+      font-size: 11px; font-weight: 500; padding: 3px 9px;
+      border-radius: var(--radius-pill); white-space: nowrap; flex-shrink: 0;
+    }
+    .badge.low  { background: #edf6e5; color: #3a6e18; }
+    .badge.med  { background: #fef4e4; color: #8a5c10; }
+    .badge.high { background: #fdecea; color: #a82b2b; }
+    .idea-desc {
+      font-size: 13px; color: var(--text-muted); line-height: 1.65;
+      margin-bottom: 10px;
+    }
+    .idea-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text-hint); flex-wrap: wrap;
+    }
+    .tag-pill {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-pill); padding: 2px 9px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .dot { color: var(--border-strong); }
+    .del-btn {
+      margin-left: auto; background: none; border: none;
+      font-size: 12px; color: var(--text-hint); cursor: pointer;
+      font-family: var(--font); padding: 0; transition: color 0.15s;
+    }
+    .del-btn:hover { color: #a82b2b; }
+
+    .empty {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--text-hint); font-size: 14px;
+    }
+
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--surface);
+      font-size: 13px; padding: 8px 18px; border-radius: var(--radius-pill);
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 480px) {
+      .row2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Idea <span>Journal</span></h1>
+    <p>Capture thoughts. Revisit them when the time is right.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-row">
+      <label>Title</label>
+      <input type="text" id="inp-title" placeholder="What's the idea?" />
+    </div>
+    <div class="form-row">
+      <label>Description</label>
+      <textarea id="inp-desc" placeholder="Add more detail, context, or why it matters..."></textarea>
+    </div>
+    <div class="row2">
+      <div class="form-row">
+        <label>Tag / category</label>
+        <input type="text" id="inp-tag" placeholder="e.g. product, life, work" />
+      </div>
+      <div class="form-row">
+        <label>Priority</label>
+        <div class="priority-row">
+          <div class="pri-btn p-low" onclick="setPri('low',this)">Low</div>
+          <div class="pri-btn p-med active" onclick="setPri('med',this)">Med</div>
+          <div class="pri-btn p-high" onclick="setPri('high',this)">High</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Mood right now</label>
+      <div class="mood-row">
+        <div class="mood-btn" onclick="setMood('Energised',this)">Energised</div>
+        <div class="mood-btn active" onclick="setMood('Calm',this)">Calm</div>
+        <div class="mood-btn" onclick="setMood('Curious',this)">Curious</div>
+        <div class="mood-btn" onclick="setMood('Restless',this)">Restless</div>
+        <div class="mood-btn" onclick="setMood('Tired',this)">Tired</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <button class="save-btn" onclick="addIdea()">Save idea</button>
+    </div>
+  </div>
+
+  <div class="section-label" id="browse-label" style="display:none">Browse</div>
+  <div class="filters" id="filters"></div>
+  <div class="ideas-list" id="ideas-list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'idea-journal-v1';
+let ideas = [];
+let nextId = 1;
+let selPri = 'med';
+let selMood = 'Calm';
+let activeTag = 'All';
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      ideas = d.ideas || [];
+      nextId = d.nextId || ideas.length + 1;
+    }
+  } catch(e) { ideas = []; }
+  updateFilters();
+  render();
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ideas, nextId }));
+  } catch(e) {}
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function setPri(p, el) {
+  selPri = p;
+  document.querySelectorAll('.pri-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setMood(m, el) {
+  selMood = m;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function filterTag(tag, el) {
+  activeTag = tag;
+  document.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function addIdea() {
+  const title = document.getElementById('inp-title').value.trim();
+  const desc = document.getElementById('inp-desc').value.trim();
+  const tag = document.getElementById('inp-tag').value.trim().toLowerCase() || 'general';
+  if (!title) { document.getElementById('inp-title').focus(); return; }
+  const now = new Date();
+  const date = now.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+  ideas.unshift({ id: nextId++, title, desc, tag, priority: selPri, mood: selMood, date });
+  document.getElementById('inp-title').value = '';
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-tag').value = '';
+  save();
+  toast('Idea saved');
+  updateFilters();
+  render();
+}
+
+function deleteIdea(id) {
+  ideas = ideas.filter(i => i.id !== id);
+  save();
+  toast('Deleted');
+  updateFilters();
+  render();
+}
+
+function updateFilters() {
+  const tags = ['All', ...new Set(ideas.map(i => i.tag))];
+  if (!tags.includes(activeTag)) activeTag = 'All';
+  const fc = document.getElementById('filters');
+  const label = document.getElementById('browse-label');
+  if (ideas.length === 0) {
+    fc.innerHTML = '';
+    label.style.display = 'none';
+    return;
+  }
+  label.style.display = 'block';
+  fc.innerHTML = tags.map(t =>
+    `<div class="tag-filter${activeTag === t ? ' active' : ''}" onclick="filterTag('${t}',this)">${t}</div>`
+  ).join('');
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render() {
+  const list = document.getElementById('ideas-list');
+  const filtered = activeTag === 'All' ? ideas : ideas.filter(i => i.tag === activeTag);
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">${ideas.length === 0 ? 'No ideas yet — add your first one above.' : 'Nothing in this category yet.'}</div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(i => `
+    <div class="idea-card">
+      <div class="idea-top">
+        <span class="idea-title">${esc(i.title)}</span>
+        <span class="badge ${i.priority}">${i.priority.charAt(0).toUpperCase() + i.priority.slice(1)}</span>
+      </div>
+      ${i.desc ? `<div class="idea-desc">${esc(i.desc)}</div>` : ''}
+      <div class="idea-meta">
+        <span class="tag-pill">${esc(i.tag)}</span>
+        <span class="dot">·</span>
+        <span>${esc(i.mood)}</span>
+        <span class="dot">·</span>
+        <span>${esc(i.date)}</span>
+        <button class="del-btn" onclick="deleteIdea(${i.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+load();
+</script>
+</body>
+</html>
